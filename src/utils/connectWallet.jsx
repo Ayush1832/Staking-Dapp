@@ -26,8 +26,8 @@ export const connectWallet = async()=>{
        provider = new ethers.BrowserProvider(window.ethereum);
        signer = await provider.getSigner();
 
-       const stakingContractAddress="0x9c53e3601273494cd5d93f856e1682d57a58b8d3"
-       const stakeTokenContractAddress="0x9c53e3601273494cd5d93f856e1682d57a58b8d3"
+       const stakingContractAddress="0x966Fd2686446C760B7Fc428761BB796b382AA655"
+       const stakeTokenContractAddress="0xc167bcd7745e282f906ad0f1187f212bf8d92df5"
 
        stakingContract= new Contract(stakingContractAddress,stakingAbi,signer);
        stakeTokenContract=new Contract(stakeTokenContractAddress,stakeTokenAbi,signer);
