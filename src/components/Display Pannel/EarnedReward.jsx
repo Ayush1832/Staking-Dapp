@@ -11,42 +11,57 @@ const EarnedReward = () => {
   useEffect(() => {
     const fetchStakeRewardInfo = async () => {
       try {
-        if (!stakingContract) throw new Error("Staking contract not initialized");
-        if (!selectedAccount) throw new Error("Selected account not initialized");
-  
-        // Log current contract state and account information
-        console.log("Selected Account:", selectedAccount);
-        console.log("Staking Contract Address:", stakingContract.address);
-  
         const rewardValueWei = await stakingContract.earned(selectedAccount);
-        console.log("Reward Value in Wei:", rewardValueWei);  // Log the fetched reward value
-  
         const rewardValueEth = ethers.formatUnits(rewardValueWei, 18).toString();
         const roundedReward = parseFloat(rewardValueEth).toFixed(2);
         setRewardVal(roundedReward);
       } catch (error) {
-        toast.error("Error fetching the reward");
+        toast.error("Error fetching the reward:");
         console.error("Error fetching reward:", error);
       }
     };
-  
+
     const interval = setInterval(() => {
-      if (stakingContract && selectedAccount) {
-        fetchStakeRewardInfo();
-      }
+      stakingContract && fetchStakeRewardInfo();
     }, 20000);
-  
+
     if (stakingContract && selectedAccount) {
       fetchStakeRewardInfo();
     }
-  
+
     return () => clearInterval(interval);
   }, [stakingContract, selectedAccount]);
+
+  const claimRewards = async () => {
+    try {
+      const rewardValueWei = await stakingContract.earned(selectedAccount);
+      if (rewardValueWei.toString() === "0") {
+        toast.error("No rewards to claim.");
+        return;
+      }
   
+      const transaction = await stakingContract.getReward({ gasLimit: 2000000 });
+      await toast.promise(transaction.wait(), {
+        loading: "Claiming rewards...",
+        success: "Rewards claimed successfully!",
+        error: "Failed to claim rewards",
+      });
+      setRewardVal("0");
+    } catch (error) {
+      toast.error("Error claiming rewards");
+      console.error("Error claiming rewards:", error);
+    }
+  };
+  
+
+
   return (
     <div className="earned-reward">
       <p>Earned Reward:</p>
       <span>{rewardVal}</span>
+      <button onClick={claimRewards} className="claim-rewards-button">
+        Claim Rewards
+      </button>
     </div>
   );
 };
